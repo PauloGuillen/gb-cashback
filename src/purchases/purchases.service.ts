@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from 'src/users/entities/user.entity'
 import { PurchasesPerMonth } from './entities/purchases-per-month.entity'
+import { OutputPurchaseDto } from './dto/output-purchase.dto'
 
 @Injectable()
 export class PurchasesService {
@@ -32,13 +33,14 @@ export class PurchasesService {
     return purchase
   }
 
-  findAll(cpf: string) {
-    return this.repository.find({
+  async findAll(cpf: string): Promise<OutputPurchaseDto[]> {
+    const purchases = await this.repository.find({
       where: { cpf },
       order: {
         dateOfPurchase: 'ASC',
       },
     })
+    return await Promise.all(purchases.map(purchase => this.cashback(purchase)))
   }
 
   findOne(id: number) {
@@ -81,5 +83,39 @@ export class PurchasesService {
       throw new NotFoundException('User not found.')
     }
     return user
+  }
+
+  private async cashback(purchase: Purchase): Promise<OutputPurchaseDto> {
+    const dateStr = purchase.dateOfPurchase.toISOString()
+    const year = +dateStr.slice(0, 4)
+    const month = +dateStr.slice(5, 7)
+
+    let perMonth = await this.repositoryPerMonth.findOne({
+      where: {
+        cpf: purchase.cpf,
+        year,
+        month,
+      },
+    })
+
+    let total = 0
+    if (perMonth) {
+      total = perMonth.valueInCents
+    }
+
+    let cachbackPerc = 0
+    if (total <= 100000) cachbackPerc = 10
+    else if (total <= 150000) cachbackPerc = 15
+    else cachbackPerc = 20
+
+    console.log('cachbackPerc: ', cachbackPerc)
+
+    return {
+      code: purchase.code,
+      dateOfPurchase: purchase.dateOfPurchase,
+      valueInCents: purchase.valueInCents,
+      cachbackPerc,
+      cachbackInCents: Math.round((purchase.valueInCents * cachbackPerc) / 100),
+    }
   }
 }
