@@ -5,7 +5,6 @@ import { DatabaseModule } from './database/database.module'
 import { JwtModule } from '@nestjs/jwt'
 import { AuthService } from './auth/auth.service'
 import { PurchasesModule } from './purchases/purchases.module'
-import { PurchasesPerMonthModule } from './purchases-per-month/purchases-per-month.module'
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { PurchasesPerMonthModule } from './purchases-per-month/purchases-per-mon
     UsersModule,
     DatabaseModule,
     PurchasesModule,
-    PurchasesPerMonthModule,
   ],
   controllers: [],
   providers: [AuthService],

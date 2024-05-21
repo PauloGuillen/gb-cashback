@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { PurchasesPerMonth } from 'src/purchases-per-month/entities/purchases-per-month.entity'
 import { Purchase } from 'src/purchases/entities/purchase.entity'
+import { PurchasesPerMonth } from 'src/purchases/entities/purchases-per-month.entity'
 import { User } from 'src/users/entities/user.entity'
 import { DataSourceOptions } from 'typeorm'
 

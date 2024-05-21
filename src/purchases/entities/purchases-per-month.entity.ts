@@ -15,6 +15,9 @@ export class PurchasesPerMonth {
   @Column()
   valueInCents: number
 
+  @Column()
+  cpf: string
+
   @ManyToOne(() => User, user => user.purchases)
   user: User
 }

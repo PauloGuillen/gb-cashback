@@ -1,5 +1,5 @@
-import { PurchasesPerMonth } from 'src/purchases-per-month/entities/purchases-per-month.entity'
 import { Purchase } from 'src/purchases/entities/purchase.entity'
+import { PurchasesPerMonth } from 'src/purchases/entities/purchases-per-month.entity'
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('users')
