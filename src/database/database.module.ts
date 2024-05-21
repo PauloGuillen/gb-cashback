@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { Purchase } from 'src/purchases/entities/purchase.entity'
 import { User } from 'src/users/entities/user.entity'
 import { DataSourceOptions } from 'typeorm'
 
@@ -10,7 +11,7 @@ export const dataSourceOptions: DataSourceOptions = {
   username: 'postgres',
   password: 'secret',
   database: 'gb-cashback',
-  entities: [User],
+  entities: [User, Purchase],
   synchronize: true,
 }
 
