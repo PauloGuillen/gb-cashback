@@ -11,6 +11,7 @@ import { PurchasesService } from './purchases.service'
 import { CreatePurchaseDto } from './dto/create-purchase.dto'
 import { AuthGuard } from 'src/auth/auth.guard'
 import { AuthService } from 'src/auth/auth.service'
+import { OutputPurchaseDto } from './dto/output-purchase.dto'
 
 @Controller('purchases')
 export class PurchasesController {
@@ -31,7 +32,9 @@ export class PurchasesController {
 
   @Get()
   @UseGuards(AuthGuard)
-  async findAll(@Headers('authorization') token: string) {
+  async findAll(
+    @Headers('authorization') token: string,
+  ): Promise<OutputPurchaseDto[]> {
     const cpf = await this.authService.tokenCpf(token)
     return this.purchasesService.findAll(cpf)
   }
