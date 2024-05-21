@@ -21,11 +21,17 @@ export class PurchasesService {
     if (!user) {
       throw new NotFoundException('User not found.')
     }
-    const purchase = this.repository.create({
+    let purchase = this.repository.create({
       ...createPurchaseDto,
       user,
     })
-    return await this.repository.save(purchase)
+    purchase = await this.repository.save(purchase)
+    const date = new Date(purchase.dateOfPurchase)
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    console.log('month: ', month)
+    console.log('year: ', year)
+    return purchase
   }
 
   findAll() {
@@ -35,4 +41,6 @@ export class PurchasesService {
   findOne(id: number) {
     return `This action returns a #${id} purchase`
   }
+
+  private totalPerMonth(user: User, date: Date, valueInCents: number) {}
 }
