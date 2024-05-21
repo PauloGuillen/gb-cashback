@@ -17,8 +17,8 @@ export class PurchasesService {
     private repositoryPerMonth: Repository<PurchasesPerMonth>,
   ) {}
 
-  async create(createPurchaseDto: CreatePurchaseDto) {
-    const user = await this.findUser(createPurchaseDto.cpf)
+  async create(cpf: string, createPurchaseDto: CreatePurchaseDto) {
+    const user = await this.findUser(cpf)
     let purchase = this.repository.create({
       ...createPurchaseDto,
       user,
@@ -32,8 +32,13 @@ export class PurchasesService {
     return purchase
   }
 
-  findAll() {
-    return `This action returns all purchases`
+  findAll(cpf: string) {
+    return this.repository.find({
+      where: { cpf },
+      order: {
+        dateOfPurchase: 'ASC',
+      },
+    })
   }
 
   findOne(id: number) {

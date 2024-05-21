@@ -36,8 +36,9 @@ export class UsersService {
 
     const token = await this.authService.createToken(user.id, user.cpf)
     const checkToken = await this.authService.checkToken(token)
-    console.log('token id: ', checkToken.id)
-    console.log('token cpf: ', checkToken.cpf)
-    return token
+    if (!checkToken) {
+      throw new UnauthorizedException('token invalid')
+    }
+    return { auth: true, token: token }
   }
 }

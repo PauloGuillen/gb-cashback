@@ -11,10 +11,17 @@ export class AuthService {
 
   async checkToken(token: string) {
     try {
-      console.log('token: ', token)
-      const verify = this.jwtService.verify(token.replace('Bearer ', ''))
-      console.log('verify: ', verify)
+      const verify = this.jwtService.verify(token.replace('token ', ''))
       return verify
+    } catch (err) {
+      return false
+    }
+  }
+
+  async tokenCpf(token: string) {
+    try {
+      const verify = this.jwtService.verify(token.replace('token ', ''))
+      return verify.cpf
     } catch (err) {
       return false
     }

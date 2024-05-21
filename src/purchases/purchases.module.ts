@@ -5,10 +5,20 @@ import { Purchase } from './entities/purchase.entity'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from 'src/users/entities/user.entity'
 import { PurchasesPerMonth } from './entities/purchases-per-month.entity'
+import { AuthService } from 'src/auth/auth.service'
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Purchase, User, PurchasesPerMonth])],
+  imports: [
+    TypeOrmModule.forFeature([Purchase, User, PurchasesPerMonth]),
+    JwtModule.register({
+      secret: process.env.SECRET,
+      signOptions: {
+        expiresIn: parseInt(process.env.EXPIRES),
+      },
+    }),
+  ],
   controllers: [PurchasesController],
-  providers: [PurchasesService],
+  providers: [PurchasesService, AuthService],
 })
 export class PurchasesModule {}
