@@ -1,5 +1,5 @@
-import { Purchase } from 'src/purchases/entities/purchase.entity'
-import { PurchasesPerMonth } from 'src/purchases/entities/purchases-per-month.entity'
+import { Purchase } from '../../purchases/entities/purchase.entity'
+import { PurchasesPerMonth } from '../../purchases/entities/purchases-per-month.entity'
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('users')
@@ -13,7 +13,7 @@ export class User {
   @Column({ unique: true })
   cpf: string
 
-  @Column({ unique: true })
+  @Column()
   email: string
 
   @Column()

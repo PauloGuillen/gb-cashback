@@ -1,14 +1,11 @@
 import { IsDate, IsInt, IsNotEmpty, IsString } from 'class-validator'
 
-export class CreatePurchaseDto {
-  @IsString()
-  @IsNotEmpty()
+export class CreateOutPurchaseDto {
   code: string
-
-  @IsInt()
-  @IsNotEmpty()
   valueInCents: number
-
-  @IsNotEmpty()
   dateOfPurchase: Date
+  user: {
+    name: string
+    cpf: string
+  }
 }

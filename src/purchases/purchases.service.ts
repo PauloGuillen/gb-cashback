@@ -6,6 +6,8 @@ import { Repository } from 'typeorm'
 import { User } from 'src/users/entities/user.entity'
 import { PurchasesPerMonth } from './entities/purchases-per-month.entity'
 import { OutputPurchaseDto } from './dto/output-purchase.dto'
+import { HttpService } from '@nestjs/axios'
+import { CreateOutPurchaseDto } from './dto/create-out-purchase.dto'
 
 @Injectable()
 export class PurchasesService {
@@ -16,12 +18,25 @@ export class PurchasesService {
     private usersRepository: Repository<User>,
     @InjectRepository(PurchasesPerMonth)
     private repositoryPerMonth: Repository<PurchasesPerMonth>,
+    private readonly httpService: HttpService,
   ) {}
 
-  async create(cpf: string, createPurchaseDto: CreatePurchaseDto) {
+  async create(
+    cpf: string,
+    createPurchaseDto: CreatePurchaseDto,
+  ): Promise<CreateOutPurchaseDto> {
     const user = await this.findUser(cpf)
-    let purchase = this.repository.create({
+
+    let status = 'Em validação'
+    if (cpf === '153.509.460-56') status = 'Aprovado'
+    let purchaseDto = {
       ...createPurchaseDto,
+      status,
+      cpf,
+    }
+
+    let purchase = this.repository.create({
+      ...purchaseDto,
       user,
     })
     purchase = await this.repository.save(purchase)
@@ -30,7 +45,15 @@ export class PurchasesService {
       new Date(purchase.dateOfPurchase),
       purchase.valueInCents,
     )
-    return purchase
+    return {
+      code: purchase.code,
+      valueInCents: purchase.valueInCents,
+      dateOfPurchase: purchase.dateOfPurchase,
+      user: {
+        name: purchase.user.name,
+        cpf: purchase.user.cpf,
+      },
+    }
   }
 
   async findAll(cpf: string): Promise<OutputPurchaseDto[]> {
@@ -43,8 +66,10 @@ export class PurchasesService {
     return await Promise.all(purchases.map(purchase => this.cashback(purchase)))
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} purchase`
+  findCredit() {
+    return this.httpService.get(
+      'https://mdaqk8ek5j.execute-api.us-east-1.amazonaws.com/v1/cashback?cpf=12312312323',
+    )
   }
 
   private async totalPerMonth(
@@ -107,8 +132,6 @@ export class PurchasesService {
     if (total <= 100000) cachbackPerc = 10
     else if (total <= 150000) cachbackPerc = 15
     else cachbackPerc = 20
-
-    console.log('cachbackPerc: ', cachbackPerc)
 
     return {
       code: purchase.code,

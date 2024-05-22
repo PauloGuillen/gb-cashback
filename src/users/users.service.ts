@@ -1,5 +1,6 @@
 import {
   Injectable,
+  NotAcceptableException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
@@ -8,19 +9,28 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { Repository } from 'typeorm'
 import { LoginUserDto } from './dto/login-user.dto'
-import { AuthService } from 'src/auth/auth.service'
+import { OutputUserDto } from './dto/output-user.dto'
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-    private authService: AuthService,
-  ) {}
+  @InjectRepository(User)
+  private usersRepository: Repository<User>
 
-  async create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(createUserDto)
-    return await this.usersRepository.save(createUserDto)
+  async create(createUserDto: CreateUserDto): Promise<OutputUserDto> {
+    let user = await this.usersRepository.findOne({
+      where: { cpf: createUserDto.cpf },
+    })
+    if (user && user.cpf === createUserDto.cpf) {
+      throw new NotAcceptableException('cpf duplicate')
+    }
+    user = this.usersRepository.create(createUserDto)
+    user = await this.usersRepository.save(createUserDto)
+    return {
+      id: user.id,
+      name: user.name,
+      cpf: user.cpf,
+      email: user.email,
+    }
   }
 
   async login(loginUserDto: LoginUserDto) {
@@ -34,11 +44,6 @@ export class UsersService {
       throw new UnauthorizedException('Password not valid')
     }
 
-    const token = await this.authService.createToken(user.id, user.cpf)
-    const checkToken = await this.authService.checkToken(token)
-    if (!checkToken) {
-      throw new UnauthorizedException('token invalid')
-    }
-    return { auth: true, token: token }
+    return user.id
   }
 }

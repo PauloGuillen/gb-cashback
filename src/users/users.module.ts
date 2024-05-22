@@ -3,9 +3,9 @@ import { UsersService } from './users.service'
 import { UsersController } from './users.controller'
 import { User } from './entities/user.entity'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { AuthService } from 'src/auth/auth.service'
 import { JwtModule } from '@nestjs/jwt'
 import { ConfigModule } from '@nestjs/config'
+import { AuthService } from 'src/auth/auth.service'
 
 @Module({
   imports: [

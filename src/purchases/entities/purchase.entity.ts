@@ -1,4 +1,4 @@
-import { User } from 'src/users/entities/user.entity'
+import { User } from '../../users/entities/user.entity'
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('purchases')
@@ -18,7 +18,7 @@ export class Purchase {
   @Column()
   cpf: string
 
-  @Column({ default: 'Em validação' })
+  @Column()
   status: string
 
   @ManyToOne(() => User, user => user.purchases)

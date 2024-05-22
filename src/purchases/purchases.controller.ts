@@ -39,8 +39,8 @@ export class PurchasesController {
     return this.purchasesService.findAll(cpf)
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.purchasesService.findOne(+id)
+  @Get('credit')
+  findCredit() {
+    return this.purchasesService.findCredit()
   }
 }
