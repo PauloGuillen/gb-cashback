@@ -8,6 +8,7 @@ import { PurchasesPerMonth } from './entities/purchases-per-month.entity'
 import { OutputPurchaseDto } from './dto/output-purchase.dto'
 import { HttpService } from '@nestjs/axios'
 import { CreateOutPurchaseDto } from './dto/create-out-purchase.dto'
+import { catchError, firstValueFrom } from 'rxjs'
 
 @Injectable()
 export class PurchasesService {
@@ -66,10 +67,23 @@ export class PurchasesService {
     return await Promise.all(purchases.map(purchase => this.cashback(purchase)))
   }
 
-  findCredit() {
-    return this.httpService.get(
-      'https://mdaqk8ek5j.execute-api.us-east-1.amazonaws.com/v1/cashback?cpf=12312312323',
+  async findCredit(cpf: string) {
+    const cpfNumbers = cpf.replaceAll('.', '').replaceAll('-', '')
+    const uriCredit = `https://mdaqk8ek5j.execute-api.us-east-1.amazonaws.com/v1/cashback?cpf=${cpfNumbers}`
+
+    https: console.log('cpf: ', cpfNumbers)
+    console.log(uriCredit)
+
+    const { data } = await firstValueFrom(
+      this.httpService.get(uriCredit).pipe(
+        catchError(error => {
+          throw `An error happened. Msg: ${JSON.stringify(
+            error?.response?.data,
+          )}`
+        }),
+      ),
     )
+    return data.body
   }
 
   private async totalPerMonth(

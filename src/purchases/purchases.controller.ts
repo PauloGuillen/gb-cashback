@@ -40,7 +40,9 @@ export class PurchasesController {
   }
 
   @Get('credit')
-  findCredit() {
-    return this.purchasesService.findCredit()
+  @UseGuards(AuthGuard)
+  async findCredit(@Headers('authorization') token: string) {
+    const cpf = await this.authService.tokenCpf(token)
+    return this.purchasesService.findCredit(cpf)
   }
 }
