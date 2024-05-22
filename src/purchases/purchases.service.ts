@@ -71,9 +71,6 @@ export class PurchasesService {
     const cpfNumbers = cpf.replaceAll('.', '').replaceAll('-', '')
     const uriCredit = `https://mdaqk8ek5j.execute-api.us-east-1.amazonaws.com/v1/cashback?cpf=${cpfNumbers}`
 
-    https: console.log('cpf: ', cpfNumbers)
-    console.log(uriCredit)
-
     const { data } = await firstValueFrom(
       this.httpService.get(uriCredit).pipe(
         catchError(error => {

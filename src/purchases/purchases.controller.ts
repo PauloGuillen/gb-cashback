@@ -12,8 +12,10 @@ import { CreatePurchaseDto } from './dto/create-purchase.dto'
 import { AuthGuard } from 'src/auth/auth.guard'
 import { AuthService } from 'src/auth/auth.service'
 import { OutputPurchaseDto } from './dto/output-purchase.dto'
+import { ApiTags } from '@nestjs/swagger'
 
 @Controller('purchases')
+@ApiTags('purchases')
 export class PurchasesController {
   constructor(
     private readonly purchasesService: PurchasesService,
