@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Logger, Module } from '@nestjs/common'
 import { PurchasesService } from './purchases.service'
 import { PurchasesController } from './purchases.controller'
 import { Purchase } from './entities/purchase.entity'
@@ -21,6 +21,6 @@ import { HttpModule } from '@nestjs/axios'
     HttpModule,
   ],
   controllers: [PurchasesController],
-  providers: [PurchasesService, AuthService],
+  providers: [Logger, PurchasesService, AuthService],
 })
 export class PurchasesModule {}

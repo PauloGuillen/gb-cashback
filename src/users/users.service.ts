@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotAcceptableException,
   NotFoundException,
   UnauthorizedException,
@@ -10,11 +11,18 @@ import { User } from './entities/user.entity'
 import { Repository } from 'typeorm'
 import { LoginUserDto } from './dto/login-user.dto'
 import { OutputUserDto } from './dto/output-user.dto'
+import { AuthService } from 'src/auth/auth.service'
 
 @Injectable()
 export class UsersService {
-  @InjectRepository(User)
-  private usersRepository: Repository<User>
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    private readonly logger: Logger,
+    private readonly authService: AuthService,
+  ) {}
+
+  SERVICE: string = UsersService.name
 
   async create(createUserDto: CreateUserDto): Promise<OutputUserDto> {
     let user = await this.usersRepository.findOne({
@@ -25,6 +33,7 @@ export class UsersService {
     }
     user = this.usersRepository.create(createUserDto)
     user = await this.usersRepository.save(createUserDto)
+    this.logger.log(`User created successfully - ${user.cpf}`, this.SERVICE)
     return {
       id: user.id,
       name: user.name,
@@ -44,6 +53,8 @@ export class UsersService {
       throw new UnauthorizedException('Password not valid')
     }
 
-    return user.id
+    const token = await this.authService.createToken(user.id, user.cpf)
+    this.logger.log(`Login user successfully - ${user.cpf}`, this.SERVICE)
+    return { auth: true, token: token }
   }
 }

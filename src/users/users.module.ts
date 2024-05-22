@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Logger, Module } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { UsersController } from './users.controller'
 import { User } from './entities/user.entity'
@@ -19,6 +19,6 @@ import { AuthService } from 'src/auth/auth.service'
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthService],
+  providers: [Logger, UsersService, AuthService],
 })
 export class UsersModule {}

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { CreatePurchaseDto } from './dto/create-purchase.dto'
 import { Purchase } from './entities/purchase.entity'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -20,7 +20,10 @@ export class PurchasesService {
     @InjectRepository(PurchasesPerMonth)
     private repositoryPerMonth: Repository<PurchasesPerMonth>,
     private readonly httpService: HttpService,
+    private readonly logger: Logger,
   ) {}
+
+  SERVICE: string = PurchasesService.name
 
   async create(
     cpf: string,
@@ -46,6 +49,7 @@ export class PurchasesService {
       new Date(purchase.dateOfPurchase),
       purchase.valueInCents,
     )
+    this.logger.log(`Purchase created successfully - ${cpf}`, this.SERVICE)
     return {
       code: purchase.code,
       valueInCents: purchase.valueInCents,
@@ -64,6 +68,7 @@ export class PurchasesService {
         dateOfPurchase: 'ASC',
       },
     })
+    this.logger.log(`Get cashback - ${cpf}`, this.SERVICE)
     return await Promise.all(purchases.map(purchase => this.cashback(purchase)))
   }
 
@@ -74,6 +79,7 @@ export class PurchasesService {
     const { data } = await firstValueFrom(
       this.httpService.get(uriCredit).pipe(
         catchError(error => {
+          this.logger.log(`Purchase/credit - ${error}`, this.SERVICE)
           throw `An error happened. Msg: ${JSON.stringify(
             error?.response?.data,
           )}`
