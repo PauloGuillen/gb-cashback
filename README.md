@@ -1,73 +1,91 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+## gb-cashback
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Esta é uma API para gerir um sistema de Cashback, onde o valor será disponibilizado como crédito para a próxima compra da revendedora no Boticário.
+Os(as) revendedores(as) poderão cadastrar suas compras e acompanhar o retono de cashback de cada operação.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+#### Rotas do back-end
 
-## Description
+- Cadastrar um(a) novo revendedor(a)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+  - POST /users/accounts
+    - body:
+      {
+      name: string,
+      cpf: string,
+      email: string,
+      password: string
+      }
 
-## Installation
+- Login de um revendedor(a)
+  - POST /users/login
+    - body:
+      {
+      cpf: string,
+      password: string
+      }
 
-```bash
-$ npm install
-```
+O token gerado tem o formato: { token: 'ZXPURQOARHiMc6Y0flhRC1LVlZQVFRnm' }
 
-## Running the app
+Para acessar os próximos endpoints, o(a) revendedor(a) deve estar logado(a) e, assim, não será mais necessário fornecer novamente o CPF.
 
-```bash
-# development
-$ npm run start
+- Cadastrar uma nova compra
 
-# watch mode
-$ npm run start:dev
+  - POST /purchases
+    - body:
+      {
+      code: string,
+      valueInCents: number,
+      dateOfPurchase: Date
+      }
 
-# production mode
-$ npm run start:prod
-```
+- Listar as compras cadastradas com os respectivos cashback
 
-## Test
+  - GET /purchases
 
-```bash
-# unit tests
-$ npm run test
+- Acumulado de cashback até o momento
+  - GET /purchases/credit
 
-# e2e tests
-$ npm run test:e2e
+#### Swagger
 
-# test coverage
-$ npm run test:cov
-```
+- No link GET /api pode ser consultada a documentação da API, gerada pelo Swagger.
 
-## Support
+#### Premissas do caso de uso:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Para evitar problemas com imprecisões dos números fracionários, os valores monetários, tanto de entradas como de saida, serão expressos em centavos, como um número inteiro. Por exemplo, R$ 123,50 deve ser representado como 12350.
 
-## Stay in touch
+As compras são salvas com o status “Em validação”, exceto
+quando o CPF do revendedor(a) for 153.509.460-56, neste caso o status é salvo como
+“Aprovado”.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Na listagem das compras cadastradas são retornados código, valor, data, status, % de cashback e valor aplicado para cada uma.
 
-## License
+Os critérios de bonificação são:
 
-Nest is [MIT licensed](LICENSE).
+- Para até 1.000 reais em compras, o(a) revendedor(a) receberá 10% de cashback do
+  valor vendido no período de um mês (sobre a soma de todas as vendas);
+- Entre 1.000 e 1.500 reais em compras, o(a) revendedor(a) receberá 15% de cashback do valor vendido no período de um mês (sobre a soma de todas as vendas);
+- Acima de 1.500 reais em compras, o(a) revendedor(a) receberá 20% de cashback do
+  valor vendido no período de um mês (sobre a soma de todas as vendas).
+
+#### Tecnologias
+
+- Node.js
+- TypeScript
+- NestJS
+- Postgres
+- Docker
+- Docker compose
+- Winston Logger
+- Swagger
+
+#### Execução local
+
+Caso queira utilizar a aplicação localmente, clone esse
+repositório, tenha o docker compose instalado e, na pasta
+do projeto, execute o seguinte comando:
+
+docker compose up
+
+Podendo acessar o link, por exemplo:
+
+http://localhost:3000/users/accounts
