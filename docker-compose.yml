@@ -13,14 +13,5 @@ services:
     environment:
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=gb-cashback
-  app:
-    build: .
-    entrypoint: .docker/entrypoint.sh
-    container_name: gb-cashback-app
-    ports:
-      - '3000:3000'
-    volumes:
-      - .:/home/node/app
-    env_file: .env
-    depends_on:
-      - db
+
+    
