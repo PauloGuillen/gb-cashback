@@ -8,7 +8,8 @@ import { AuthService } from './auth/auth.service'
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
+    // ConfigModule.forRoot(),
     JwtModule.register({
       secret: process.env.SECRET,
       signOptions: {

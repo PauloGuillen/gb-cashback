@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Headers,
+  Query,
 } from '@nestjs/common'
 import { PurchasesService } from './purchases.service'
 import { CreatePurchaseDto } from './dto/create-purchase.dto'
