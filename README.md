@@ -81,10 +81,13 @@ Os critérios de bonificação são:
 #### Execução local
 
 Caso queira utilizar a aplicação localmente, clone esse
-repositório, tenha o docker compose instalado e, na pasta
-do projeto, execute o seguinte comando:
+repositório, tenha o docker compose e o Node.js instalado e, na pasta
+do projeto, execute os seguintes comandos:
 
 docker compose up
+renomei o arquivo .env_example para .env
+npm install
+npm run start
 
 Podendo acessar o link, por exemplo:
 
