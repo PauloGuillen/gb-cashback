@@ -12,6 +12,7 @@ import { Repository } from 'typeorm'
 import { LoginUserDto } from './dto/login-user.dto'
 import { OutputUserDto } from './dto/output-user.dto'
 import { AuthService } from 'src/auth/auth.service'
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UsersService {
@@ -31,6 +32,8 @@ export class UsersService {
     if (user && user.cpf === createUserDto.cpf) {
       throw new NotAcceptableException('cpf duplicate')
     }
+    const salt = await bcrypt.genSalt()
+    createUserDto.password = await bcrypt.hash(createUserDto.password, salt)
     user = this.usersRepository.create(createUserDto)
     user = await this.usersRepository.save(createUserDto)
     this.logger.log(`User created successfully - ${user.cpf}`, this.SERVICE)
@@ -49,7 +52,9 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found.')
     }
-    if (loginUserDto.password !== user.password) {
+
+    const isMatch = await bcrypt.compare(loginUserDto.password, user.password)
+    if (!isMatch) {
       throw new UnauthorizedException('Password not valid')
     }
 
