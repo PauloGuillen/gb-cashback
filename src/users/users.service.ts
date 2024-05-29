@@ -11,8 +11,8 @@ import { User } from './entities/user.entity'
 import { Repository } from 'typeorm'
 import { LoginUserDto } from './dto/login-user.dto'
 import { OutputUserDto } from './dto/output-user.dto'
-import { AuthService } from 'src/auth/auth.service'
 import * as bcrypt from 'bcrypt'
+import { AuthService } from '../auth/auth.service'
 
 @Injectable()
 export class UsersService {
