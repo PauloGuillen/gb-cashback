@@ -1,7 +1,8 @@
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   Logger,
-  NotAcceptableException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
@@ -29,8 +30,8 @@ export class UsersService {
     let user = await this.usersRepository.findOne({
       where: { cpf: createUserDto.cpf },
     })
-    if (user && user.cpf === createUserDto.cpf) {
-      throw new NotAcceptableException('cpf duplicate')
+    if (user) {
+      throw new HttpException('cpf duplicate', HttpStatus.CONFLICT)
     }
     const salt = await bcrypt.genSalt()
     createUserDto.password = await bcrypt.hash(createUserDto.password, salt)
@@ -50,7 +51,7 @@ export class UsersService {
       where: { cpf: loginUserDto.cpf },
     })
     if (!user) {
-      throw new NotFoundException('User not found.')
+      throw new NotFoundException('User not found')
     }
 
     const isMatch = await bcrypt.compare(loginUserDto.password, user.password)
