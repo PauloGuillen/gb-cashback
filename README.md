@@ -95,3 +95,9 @@ npm run start
 Podendo acessar o link, por exemplo:
 
 http://localhost:3000/users/accounts
+
+#### Unit tests
+
+Para executar os testes unitários utilize:
+
+npm run test
