@@ -3,12 +3,12 @@ import { CreatePurchaseDto } from './dto/create-purchase.dto'
 import { Purchase } from './entities/purchase.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { User } from 'src/users/entities/user.entity'
 import { PurchasesPerMonth } from './entities/purchases-per-month.entity'
 import { OutputPurchaseDto } from './dto/output-purchase.dto'
 import { HttpService } from '@nestjs/axios'
 import { CreateOutPurchaseDto } from './dto/create-out-purchase.dto'
 import { catchError, firstValueFrom } from 'rxjs'
+import { User } from '../users/entities/user.entity'
 
 @Injectable()
 export class PurchasesService {
@@ -33,7 +33,7 @@ export class PurchasesService {
 
     let status = 'Em validação'
     if (cpf === '153.509.460-56') status = 'Aprovado'
-    let purchaseDto = {
+    const purchaseDto = {
       ...createPurchaseDto,
       status,
       cpf,
@@ -89,7 +89,7 @@ export class PurchasesService {
     return data.body
   }
 
-  private async totalPerMonth(
+  async totalPerMonth(
     user: User,
     date: Date,
     valueInCents: number,
@@ -117,7 +117,7 @@ export class PurchasesService {
     return this.repositoryPerMonth.save(perMonth)
   }
 
-  private async findUser(cpf: string): Promise<User> {
+  async findUser(cpf: string): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { cpf },
     })
@@ -132,7 +132,7 @@ export class PurchasesService {
     const year = +dateStr.slice(0, 4)
     const month = +dateStr.slice(5, 7)
 
-    let perMonth = await this.repositoryPerMonth.findOne({
+    const perMonth = await this.repositoryPerMonth.findOne({
       where: {
         cpf: purchase.cpf,
         year,

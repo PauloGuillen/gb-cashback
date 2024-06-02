@@ -1,19 +1,10 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  UseGuards,
-  Headers,
-  Query,
-} from '@nestjs/common'
+import { Controller, Get, Post, Body, UseGuards, Headers } from '@nestjs/common'
 import { PurchasesService } from './purchases.service'
 import { CreatePurchaseDto } from './dto/create-purchase.dto'
-import { AuthGuard } from 'src/auth/auth.guard'
-import { AuthService } from 'src/auth/auth.service'
 import { OutputPurchaseDto } from './dto/output-purchase.dto'
 import { ApiTags } from '@nestjs/swagger'
+import { AuthService } from '../auth/auth.service'
+import { AuthGuard } from '../auth/auth.guard'
 
 @Controller('purchases')
 @ApiTags('purchases')
