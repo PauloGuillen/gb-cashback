@@ -16,13 +16,6 @@ import { User } from 'src/users/entities/user.entity'
           username: configService.get('DB_USER'),
           password: configService.get('DB_PASS'),
           database: configService.get('DB_NAME'),
-
-          // host: 'localhost',
-          // port: 5432,
-          // username: 'postgres',
-          // password: 'secret',
-          // database: 'gb-cashback',
-
           entities: [User, Purchase, PurchasesPerMonth],
           synchronize: true,
         }
