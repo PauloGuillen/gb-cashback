@@ -21,10 +21,6 @@ describe('PurchasesController - end-to-end (e2e) tests ', () => {
     email: 'john.doe@email.com',
     password: 'password',
   }
-  const dataLogin: LoginUserDto = {
-    cpf: dataAccount.cpf,
-    password: dataAccount.password,
-  }
   const data: CreatePurchaseDto = {
     code: '123',
     valueInCents: 99123,
@@ -98,65 +94,234 @@ describe('PurchasesController - end-to-end (e2e) tests ', () => {
         })
     })
 
-    it('should band request error', () => {
+    it('should band request error', async () => {
+      const token = await getToken(dataAccount)
       return request(app.getHttpServer())
-        .post('/users/accounts')
-        .send(dataAccount)
+        .post('/purchases')
+        .set('authorization', `token ${token}`)
+        .expect(400)
+        .then(response => {
+          expect(response.body).toEqual({
+            message: [
+              'code should not be empty',
+              'code must be a string',
+              'valueInCents should not be empty',
+              'valueInCents must be an integer number',
+              'dateOfPurchase should not be empty',
+            ],
+            error: 'Bad Request',
+            statusCode: 400,
+          })
+        })
+    })
+
+    it('should create a purchase', async () => {
+      const token = await getToken(dataAccount)
+      return request(app.getHttpServer())
+        .post('/purchases')
+        .set('authorization', `token ${token}`)
+        .send(data)
+        .expect(201)
+        .then(response => {
+          expect(response.body).toEqual({
+            code: data.code,
+            valueInCents: data.valueInCents,
+            dateOfPurchase: expect.any(String),
+            user: {
+              name: dataAccount.name,
+              cpf: dataAccount.cpf,
+            },
+          })
+        })
+    })
+  })
+
+  describe('/purchases (GET) findAll  - e2e tests ', () => {
+    it('Not authorized', () => {
+      return request(app.getHttpServer())
+        .get('/purchases')
+        .expect(403)
+        .then(response => {
+          expect(response.body).toEqual({
+            message: 'Forbidden resource',
+            error: 'Forbidden',
+            statusCode: 403,
+          })
+        })
+    })
+
+    it('No purchases', async () => {
+      const token = await getToken(dataAccount)
+      return request(app.getHttpServer())
+        .get('/purchases')
+        .set('authorization', `token ${token}`)
+        .expect(200)
+        .then(response => {
+          expect(response.body).toEqual([])
+        })
+    })
+
+    it('one purchase - cashback 10%', async () => {
+      const token = await getToken(dataAccount)
+      return request(app.getHttpServer())
+        .post('/purchases')
+        .set('authorization', `token ${token}`)
+        .send({
+          code: '123',
+          valueInCents: 99123,
+          dateOfPurchase: new Date(),
+        })
         .expect(201)
         .then(() => {
           return request(app.getHttpServer())
-            .post('/users/login')
-            .send(dataLogin)
+            .get('/purchases')
+            .set('authorization', `token ${token}`)
             .expect(200)
             .then(response => {
+              expect(response.body).toEqual([
+                {
+                  code: '123',
+                  valueInCents: 99123,
+                  dateOfPurchase: expect.any(String),
+                  cachbackPerc: 10,
+                  cachbackInCents: 9912,
+                },
+              ])
+            })
+        })
+    })
+
+    test.each([
+      [90013, 9001, 10],
+      [140000, 21000, 15],
+      [300099, 60020, 20],
+    ])(
+      'valueInCents %d - cachbackInCents %d - achbackPerc %d%',
+      async (valueInCents, cachbackInCents, cachbackPerc) => {
+        const token = await getToken(dataAccount)
+        return request(app.getHttpServer())
+          .post('/purchases')
+          .set('authorization', `token ${token}`)
+          .send({
+            code: '123',
+            valueInCents,
+            dateOfPurchase: new Date(),
+          })
+          .expect(201)
+          .then(() => {
+            return request(app.getHttpServer())
+              .get('/purchases')
+              .set('authorization', `token ${token}`)
+              .expect(200)
+              .then(response => {
+                expect(response.body).toEqual([
+                  {
+                    code: '123',
+                    valueInCents,
+                    dateOfPurchase: expect.any(String),
+                    cachbackPerc,
+                    cachbackInCents,
+                  },
+                ])
+              })
+          })
+      },
+    )
+
+    it('two purchase - cashback 20%', async () => {
+      const token = await getToken(dataAccount)
+      return request(app.getHttpServer())
+        .post('/purchases')
+        .set('authorization', `token ${token}`)
+        .send({
+          code: '123',
+          valueInCents: 99000,
+          dateOfPurchase: new Date(),
+        })
+        .expect(201)
+        .then(() => {
+          return request(app.getHttpServer())
+            .post('/purchases')
+            .set('authorization', `token ${token}`)
+            .send({
+              code: '456',
+              valueInCents: 100000,
+              dateOfPurchase: new Date(),
+            })
+            .expect(201)
+            .then(() => {
               return request(app.getHttpServer())
-                .post('/purchases')
-                .set('authorization', `token ${response.body.token}`)
-                .expect(400)
+                .get('/purchases')
+                .set('authorization', `token ${token}`)
+                .expect(200)
                 .then(response => {
-                  expect(response.body).toEqual({
-                    message: [
-                      'code should not be empty',
-                      'code must be a string',
-                      'valueInCents should not be empty',
-                      'valueInCents must be an integer number',
-                      'dateOfPurchase should not be empty',
-                    ],
-                    error: 'Bad Request',
-                    statusCode: 400,
-                  })
+                  expect(response.body).toEqual([
+                    {
+                      code: '123',
+                      valueInCents: 99000,
+                      dateOfPurchase: expect.any(String),
+                      cachbackPerc: 20,
+                      cachbackInCents: 19800,
+                    },
+                    {
+                      code: '456',
+                      valueInCents: 100000,
+                      dateOfPurchase: expect.any(String),
+                      cachbackPerc: 20,
+                      cachbackInCents: 20000,
+                    },
+                  ])
                 })
             })
         })
     })
 
-    it('should create a purchase', () => {
+    it('two purchase - different month  - cashback 10%', async () => {
+      const token = await getToken(dataAccount)
+      const dateOfPurchase: Date = new Date()
+      dateOfPurchase.setMonth(dateOfPurchase.getMonth() - 1)
+
       return request(app.getHttpServer())
-        .post('/users/accounts')
-        .send(dataAccount)
+        .post('/purchases')
+        .set('authorization', `token ${token}`)
+        .send({
+          code: '123',
+          valueInCents: 99000,
+          dateOfPurchase,
+        })
         .expect(201)
         .then(() => {
           return request(app.getHttpServer())
-            .post('/users/login')
-            .send(dataLogin)
-            .expect(200)
-            .then(response => {
+            .post('/purchases')
+            .set('authorization', `token ${token}`)
+            .send({
+              code: '456',
+              valueInCents: 100000,
+              dateOfPurchase: new Date(),
+            })
+            .expect(201)
+            .then(() => {
               return request(app.getHttpServer())
-                .post('/purchases')
-                .set('authorization', `token ${response.body.token}`)
-                .send(data)
-                .expect(201)
+                .get('/purchases')
+                .set('authorization', `token ${token}`)
+                .expect(200)
                 .then(response => {
-                  console.log(response.body)
-                  expect(response.body).toEqual({
-                    code: data.code,
-                    valueInCents: data.valueInCents,
-                    dateOfPurchase: expect.any(String),
-                    user: {
-                      name: dataAccount.name,
-                      cpf: dataAccount.cpf,
+                  expect(response.body).toEqual([
+                    {
+                      code: '123',
+                      valueInCents: 99000,
+                      dateOfPurchase: expect.any(String),
+                      cachbackPerc: 10,
+                      cachbackInCents: 9900,
                     },
-                  })
+                    {
+                      code: '456',
+                      valueInCents: 100000,
+                      dateOfPurchase: expect.any(String),
+                      cachbackPerc: 10,
+                      cachbackInCents: 10000,
+                    },
+                  ])
                 })
             })
         })
@@ -166,4 +331,24 @@ describe('PurchasesController - end-to-end (e2e) tests ', () => {
   afterEach(async () => {
     await app?.close()
   })
+
+  function getToken(dataAccount: CreateUserDto) {
+    const dataLogin: LoginUserDto = {
+      cpf: dataAccount.cpf,
+      password: dataAccount.password,
+    }
+    return request(app.getHttpServer())
+      .post('/users/accounts')
+      .send(dataAccount)
+      .expect(201)
+      .then(() => {
+        return request(app.getHttpServer())
+          .post('/users/login')
+          .send(dataLogin)
+          .expect(200)
+          .then(response => {
+            return response.body.token
+          })
+      })
+  }
 })
