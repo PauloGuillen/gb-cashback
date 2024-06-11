@@ -9,6 +9,7 @@ import { CreateUserDto } from '../dto/create-user.dto'
 import * as request from 'supertest'
 import { Purchase } from '../../purchases/entities/purchase.entity'
 import { PurchasesPerMonth } from '../../purchases/entities/purchases-per-month.entity'
+import { LoginUserDto } from '../dto/login-user.dto'
 
 describe('UsersController - end-to-end (e2e) tests ', () => {
   let app: INestApplication
@@ -69,7 +70,7 @@ describe('UsersController - end-to-end (e2e) tests ', () => {
       }),
     )
     await app.init()
-  })
+  }, 40000)
 
   describe('/users/accounts - e2e tests ', () => {
     it('should band request error', () => {
@@ -129,7 +130,86 @@ describe('UsersController - end-to-end (e2e) tests ', () => {
     })
   })
 
+  describe('/users/login - e2e tests ', () => {
+    const dataLogin: LoginUserDto = {
+      cpf: data.cpf,
+      password: data.password,
+    }
+
+    it('should band request error', () => {
+      return request(app.getHttpServer())
+        .post('/users/login')
+        .send({})
+        .expect(400)
+        .then(response => {
+          expect(response.body).toEqual({
+            message: [
+              'cpf should not be empty',
+              'cpf must be a string',
+              'password should not be empty',
+              'password must be a string',
+            ],
+            error: 'Bad Request',
+            statusCode: 400,
+          })
+        })
+    })
+
+    it('User not found', () => {
+      return request(app.getHttpServer())
+        .post('/users/login')
+        .send(dataLogin)
+        .expect(404)
+        .then(response => {
+          expect(response.body).toEqual({
+            message: 'User not found',
+            error: 'Not Found',
+            statusCode: 404,
+          })
+        })
+    })
+
+    it('Password not valid', () => {
+      return request(app.getHttpServer())
+        .post('/users/accounts')
+        .send(data)
+        .expect(201)
+        .then(() => {
+          return request(app.getHttpServer())
+            .post('/users/login')
+            .send({ ...dataLogin, password: 'invalid' })
+            .expect(401)
+            .then(response => {
+              expect(response.body).toEqual({
+                message: 'Password not valid',
+                error: 'Unauthorized',
+                statusCode: 401,
+              })
+            })
+        })
+    })
+
+    it('Login Ok', () => {
+      return request(app.getHttpServer())
+        .post('/users/accounts')
+        .send(data)
+        .expect(201)
+        .then(() => {
+          return request(app.getHttpServer())
+            .post('/users/login')
+            .send(dataLogin)
+            .expect(200)
+            .then(response => {
+              expect(response.body).toEqual({
+                auth: true,
+                token: expect.any(String),
+              })
+            })
+        })
+    })
+  })
+
   afterEach(async () => {
-    await app.close()
+    await app?.close()
   })
 })

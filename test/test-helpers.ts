@@ -29,7 +29,7 @@ export function startPostgres() {
         }
       }
     } while (true)
-  }, 20000)
+  }, 40000)
 
   return {
     get postgresContainer() {
