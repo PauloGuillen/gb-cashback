@@ -12,9 +12,9 @@ import { AuthService } from '../auth/auth.service'
     ConfigModule.forRoot(),
     TypeOrmModule.forFeature([User]),
     JwtModule.register({
-      secret: process.env.SECRET,
+      secret: process.env.SECRET || 'secret',
       signOptions: {
-        expiresIn: parseInt(process.env.EXPIRES),
+        expiresIn: parseInt(process.env.EXPIRES) || 3600,
       },
     }),
   ],

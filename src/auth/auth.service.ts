@@ -11,8 +11,7 @@ export class AuthService {
 
   async checkToken(token: string) {
     try {
-      const verify = this.jwtService.verify(token.replace('token ', ''))
-      return verify
+      return this.jwtService.verify(token.replace('token ', ''))
     } catch (err) {
       return false
     }
