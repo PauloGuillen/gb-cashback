@@ -136,7 +136,7 @@ describe('PurchasesController - end-to-end (e2e) tests ', () => {
     })
   })
 
-  describe('/purchases (GET) findAll  - e2e tests ', () => {
+  describe('/purchases (GET) findAll - e2e tests ', () => {
     it('Not authorized', () => {
       return request(app.getHttpServer())
         .get('/purchases')
@@ -324,6 +324,35 @@ describe('PurchasesController - end-to-end (e2e) tests ', () => {
                   ])
                 })
             })
+        })
+    })
+  })
+
+  describe('/purchases/credit (GET) - e2e tests ', () => {
+    it('Not authorized', () => {
+      return request(app.getHttpServer())
+        .get('/purchases/credit')
+        .expect(403)
+        .then(response => {
+          expect(response.body).toEqual({
+            message: 'Forbidden resource',
+            error: 'Forbidden',
+            statusCode: 403,
+          })
+        })
+    })
+
+    it('get credit', async () => {
+      const token = await getToken(dataAccount)
+      return request(app.getHttpServer())
+        .get('/purchases/credit')
+        .set('authorization', `token ${token}`)
+        .expect(200)
+        .then(response => {
+          return request(app.getHttpServer())
+          expect(response.body).toEqual({
+            credit: expect.any(Number),
+          })
         })
     })
   })

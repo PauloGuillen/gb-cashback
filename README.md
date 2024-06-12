@@ -75,6 +75,7 @@ Os critérios de bonificação são:
 - Postgres
 - Docker
 - Docker compose
+- Testcontainers
 - Winston Logger
 - Swagger
 
@@ -101,3 +102,9 @@ http://localhost:3000/users/accounts
 Para executar os testes unitários utilize:
 
 npm run test
+
+#### End-to-end (e2e) tests
+
+Para executar os testes e2e utilize:
+
+npm run test:e2e
